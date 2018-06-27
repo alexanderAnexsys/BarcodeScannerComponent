@@ -1,0 +1,2 @@
+# BarcodeScannerComponent
+Created with CodeSandbox
