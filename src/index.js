@@ -7,7 +7,11 @@ import "./styles.css";
 function App() {
   return (
     <div className="App">
-      <Bardcodetextfield />
+      <div id="scanner-container" />
+      <div>
+        <p style={{ display: "inline-block" }}>Barcode: </p>
+        <Bardcodetextfield style={{ display: "inline-block" }} />
+      </div>
     </div>
   );
 }

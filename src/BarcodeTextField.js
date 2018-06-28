@@ -3,20 +3,19 @@ import ReactDOM from "react-dom";
 import Quagga from "quagga"; // ES6
 import "./styles.css";
 
+var _scannerIsRunning = false;
+
 class BarcodeTextField extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { scannerRunning: false };
-
     // This binding is necessary to make `this` work in the callback
     this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick() {
-    this.setState(prevState => ({
-      scannerRunning: !prevState.isToggleOn
-    }));
-    if (this.state.scannerRunning === true) {
+    if (_scannerIsRunning) {
+      Quagga.stop();
+    } else {
       this.startScanner();
     }
   }
@@ -64,15 +63,18 @@ class BarcodeTextField extends React.Component {
       },
       function(err) {
         if (err) {
+          alert("You need a camera to scan barcodes.");
           console.log(err);
+          document.querySelector("#scanner-container").innerHTML = "";
+
           return;
         }
 
         console.log("Initialization finished. Ready to start");
         Quagga.start();
 
-        // // Set flag to is running
-        // _scannerIsRunning = true;
+        // Set flag to is running
+        //_scannerIsRunning = true;
       }
     );
 
@@ -119,6 +121,9 @@ class BarcodeTextField extends React.Component {
     });
 
     Quagga.onDetected(function(result) {
+      Quagga.stop();
+      document.querySelector("#text-input").value = result.codeResult.code;
+      document.querySelector("#scanner-container").innerHTML = "";
       console.log(
         "Barcode detected and processed : [" + result.codeResult.code + "]",
         result
@@ -128,13 +133,9 @@ class BarcodeTextField extends React.Component {
 
   render() {
     return (
-      <div>
-        {" "}
-        <form>
-          <p style={{ display: "inline-block" }}>Barcode: </p>
-          <input type="text" />
-          <button onClick={this.handleClick}> Scan </button>
-        </form>
+      <div style={{ display: "inline-block" }}>
+        <input type="text" id="text-input" />
+        <button onClick={this.handleClick}> Scan </button>
       </div>
     );
   }
