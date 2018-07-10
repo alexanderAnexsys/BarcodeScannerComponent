@@ -62,7 +62,7 @@ class BarcodeTextField extends React.Component {
           }
         }
       },
-      function (err) {
+      function(err) {
         if (err) {
           alert("You need a camera to scan barcodes.");
           console.log(err);
@@ -79,7 +79,7 @@ class BarcodeTextField extends React.Component {
       }
     );
 
-    Quagga.onProcessed(function (result) {
+    Quagga.onProcessed(function(result) {
       var drawingCtx = Quagga.canvas.ctx.overlay,
         drawingCanvas = Quagga.canvas.dom.overlay;
 
@@ -92,10 +92,10 @@ class BarcodeTextField extends React.Component {
             parseInt(drawingCanvas.getAttribute("height"))
           );
           result.boxes
-            .filter(function (box) {
+            .filter(function(box) {
               return box !== result.box;
             })
-            .forEach(function (box) {
+            .forEach(function(box) {
               Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, {
                 color: "green",
                 lineWidth: 2
@@ -121,7 +121,7 @@ class BarcodeTextField extends React.Component {
       }
     });
 
-    Quagga.onDetected(function (result) {
+    Quagga.onDetected(function(result) {
       Quagga.stop();
       document.querySelector("#text-input").value = result.codeResult.code;
       document.querySelector("#scanner-container").innerHTML = "";
@@ -134,60 +134,48 @@ class BarcodeTextField extends React.Component {
 
   handleFileSelect(evt) {
     var files = evt.target.files; // FileList object
-    // Loop through the FileList and render image files as thumbnails.
-    for (var i = 0, f; (f = files[i]); i++) {
-      // Only process image files.
-      if (!f.type.match("image.*")) {
-        continue;
-      }
 
-      var reader = new FileReader();
+    var tmpImgURL = URL.createObjectURL(files[0]);
 
-      // Closure to capture the file information.
-      reader.onload = (function (theFile) {
-        return function (e) { };
-      })(f);
-
-      // Read in the image file as a data URL.
-      reader.readAsDataURL(f);
-      var tmpImgURL = URL.createObjectURL(files[0]);
-
-      Quagga.decodeSingle(
-        {
-          src: tmpImgURL,
-          numOfWorkers: 0, // Needs to be 0 when used within node
-          locate: true,
-          inputStream: {
-            size: 800 // restrict input-size to be 800px in width (long-side)
-          },
-          decoder: {
-            readers: [
-              "code_128_reader",
-              "ean_reader",
-              "ean_8_reader",
-              "code_39_reader",
-              "code_39_vin_reader",
-              "codabar_reader",
-              "upc_reader",
-              "upc_e_reader",
-              "i2of5_reader"
-            ]
-          }
+    Quagga.decodeSingle(
+      {
+        src: tmpImgURL,
+        numOfWorkers: 0, // Needs to be 0 when used within node
+        locate: true,
+        inputStream: {
+          size: 800 // restrict input-size to be 800px in width (long-side)
         },
-        function (result) {
-          console.log(result);
-          if (result) {
-            if (result.codeResult != null) {
-              document.querySelector("#text-input").value =
-                result.codeResult.code;
-              console.log("result", result.codeResult.code);
-            } else {
-              alert("not detected");
-            }
-          }
+        decoder: {
+          readers: [
+            "code_128_reader",
+            "ean_reader",
+            "ean_8_reader",
+            "code_39_reader",
+            "code_39_vin_reader",
+            "codabar_reader",
+            "upc_reader",
+            "upc_e_reader",
+            "i2of5_reader"
+          ]
         }
-      );
-    }
+      },
+      function(result) {
+        console.log(result);
+        if (result) {
+          if (result.codeResult != null) {
+            document.querySelector("#text-input").value =
+              result.codeResult.code;
+            console.log("result", result.codeResult.code);
+          } else {
+            alert("not detected");
+            document.querySelector("#text-input").value = "";
+          }
+        } else {
+          alert("not detected");
+          document.querySelector("#text-input").value = "";
+        }
+      }
+    );
   }
 
   componentDidMount() {
